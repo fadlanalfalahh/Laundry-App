@@ -41,3 +41,5 @@ Majalaya – Bandung, Indonesia
 ---
 
 > *Laundry App* dikembangkan sebagai solusi digital untuk membantu operasional kios laundry agar lebih efisien, cepat, dan terintegrasi antara kasir dan admin.
+
+---
