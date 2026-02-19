@@ -1,0 +1,70 @@
+# System files
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+
+# Editor / IDE
+.vscode/
+!.vscode/settings.json
+.idea/
+*.iml
+
+# Log Files
+*.log
+
+# Environmet
+.env*
+
+# Dependency
+# Composer
+/vendor/
+# Node
+node_modules/
+
+# Build / Cache
+dist/
+build/
+.cache/
+coverage/
+
+# Laravel specific
+/storage/*.key
+/storage/app/*
+/storage/framework/*
+/storage/logs/*
+/bootstrap/cache/*
+!/storage/framework/.gitignore
+!/storage/logs/.gitignore
+!/storage/app/.gitignore
+
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+**/doc/api/
+**/ios/Flutter/.last_build_id
+/android/app/debug
+/android/app/profile
+/android/app/release
+app.*.symbols
+app.*.map.json
+.swiftpm/
+
+# PHP Native
+/uploads/
+/public/uploads/
+config/koneksi.php
+
+# Project specific
+migrate_working_dir/
+*.class
+*.pyc
+
+# File yang tidak ingin masuk repo
+lib/config.dart
+
+# Folder yang tidak ingin masuk repo
+assets/
