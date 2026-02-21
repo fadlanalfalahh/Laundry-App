@@ -38,8 +38,10 @@ class _UserPageState extends State<UserPage> {
   }
 
   Future<void> _loadData() async {
+    if (!mounted) return;
     setState(() => _loading = true);
     final data = await UserService.getAll();
+    if (!mounted) return;
     setState(() {
       _users = data;
       _loading = false;
@@ -64,11 +66,11 @@ class _UserPageState extends State<UserPage> {
 
     showDialog(
       context: context,
-      builder: (context) {
+      builder: (dialogContext) {
         return AlertDialog(
           title: Text(user == null ? "Tambah User" : "Edit User"),
           content: SizedBox(
-            width: MediaQuery.of(context).size.width * 0.85,
+            width: MediaQuery.of(dialogContext).size.width * 0.85,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -108,7 +110,7 @@ class _UserPageState extends State<UserPage> {
                 backgroundColor: Colors.red,
                 foregroundColor: Colors.white,
               ),
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => Navigator.pop(dialogContext),
               child: const Text("Batal"),
             ),
             ElevatedButton(
@@ -139,14 +141,14 @@ class _UserPageState extends State<UserPage> {
                   );
                 }
 
-                Navigator.pop(context);
+                if (!mounted || !dialogContext.mounted) return;
+                Navigator.pop(dialogContext);
                 if (result['success'] == true) {
                   await _loadData();
+                  if (!mounted) return;
                   tampilkanAlert(context, result['message']);
                 } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(result['message'] ?? "Gagal")),
-                  );
+                  tampilkanAlert(context, result['message'] ?? "Gagal");
                 }
               },
               child: const Text("Simpan"),
@@ -160,7 +162,7 @@ class _UserPageState extends State<UserPage> {
   void _hapusUser(String id) async {
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text("Konfirmasi"),
         content: const Text("Yakin ingin menghapus user ini?"),
         actions: [
@@ -169,7 +171,7 @@ class _UserPageState extends State<UserPage> {
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
             ),
-            onPressed: () => Navigator.pop(context, false),
+            onPressed: () => Navigator.pop(dialogContext, false),
             child: const Text("Batal"),
           ),
           ElevatedButton(
@@ -177,7 +179,7 @@ class _UserPageState extends State<UserPage> {
               backgroundColor: Colors.green,
               foregroundColor: Colors.white,
             ),
-            onPressed: () => Navigator.pop(context, true),
+            onPressed: () => Navigator.pop(dialogContext, true),
             child: const Text("Ya, Hapus"),
           ),
         ],
@@ -188,6 +190,7 @@ class _UserPageState extends State<UserPage> {
       final result = await UserService.delete(id);
       if (result['success'] == true) {
         await _loadData();
+        if (!mounted) return;
         tampilkanAlert(context, result['message']);
       }
     }

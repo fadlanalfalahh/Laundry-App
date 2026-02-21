@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 import '../services/layanan.dart';
@@ -135,9 +136,65 @@ class _TransaksiPageState extends State<TransaksiPage> {
     });
   }
 
+  String _normalisasiNomorPelanggan(String input) {
+    final digits = input.replaceAll(RegExp(r'[^0-9]'), '');
+    if (digits.isEmpty) return '';
+
+    if (digits.startsWith('0')) {
+      return digits.substring(1);
+    }
+
+    if (digits.startsWith('62')) {
+      return digits.substring(2);
+    }
+
+    return digits;
+  }
+
+  Future<void> _pilihKontakPelanggan() async {
+    try {
+      final allowed = await FlutterContacts.requestPermission(readonly: true);
+      if (!mounted) return;
+
+      if (!allowed) {
+        tampilkanAlert(context, 'Izin kontak ditolak');
+        return;
+      }
+
+      final contact = await FlutterContacts.openExternalPick();
+      if (!mounted || contact == null) return;
+
+      final nomorRaw = contact.phones
+          .map((phone) => phone.number.trim())
+          .firstWhere((number) => number.isNotEmpty, orElse: () => '');
+
+      if (nomorRaw.isEmpty) {
+        tampilkanAlert(context, 'Kontak tidak memiliki nomor telepon');
+        return;
+      }
+
+      final nomor = _normalisasiNomorPelanggan(nomorRaw);
+      if (nomor.isEmpty) {
+        tampilkanAlert(context, 'Nomor kontak tidak valid');
+        return;
+      }
+
+      final namaKontak = contact.displayName.trim();
+      if (namaKontak.isNotEmpty) {
+        _namaController.text = namaKontak;
+      }
+      _nomorController.text = nomor;
+      setState(() {});
+    } catch (e) {
+      if (!mounted) return;
+      tampilkanAlert(context, 'Gagal mengambil kontak');
+    }
+  }
+
   void _simpanTransaksi() async {
-    final nama = _namaController.text;
-    final nomor = '+62${_nomorController.text}';
+    final nama = _namaController.text.trim();
+    final nomorLokal = _normalisasiNomorPelanggan(_nomorController.text);
+    final nomor = nomorLokal.isEmpty ? '' : '+62$nomorLokal';
 
     if (nama.isEmpty ||
         _layananDipilih.isEmpty ||
@@ -546,10 +603,20 @@ class _TransaksiPageState extends State<TransaksiPage> {
       controller: controller,
       keyboardType: isNomor ? TextInputType.number : TextInputType.text,
       inputFormatters: isNomor ? [FilteringTextInputFormatter.digitsOnly] : [],
+      onChanged: (_) {
+        if (isNama) setState(() {});
+      },
       decoration: InputDecoration(
         labelText: label,
         border: const OutlineInputBorder(),
         prefixText: isNomor ? '+62 ' : null,
+        suffixIcon: isNomor
+            ? IconButton(
+                onPressed: _pilihKontakPelanggan,
+                tooltip: 'Pilih dari kontak HP',
+                icon: const Icon(Icons.contacts_outlined),
+              )
+            : null,
       ),
     );
   }
