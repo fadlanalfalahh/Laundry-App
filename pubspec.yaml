@@ -35,11 +35,6 @@ dependencies:
 
   intl: ^0.20.2
 
-  # Firebase packages
-  firebase_core: ^4.0.0
-  firebase_auth: ^6.0.1
-  cloud_firestore: ^6.0.0
-
   http: ^1.2.2
   shared_preferences: ^2.3.3
 
